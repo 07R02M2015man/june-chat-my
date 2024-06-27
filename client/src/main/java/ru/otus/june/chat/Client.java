@@ -21,8 +21,8 @@ public class Client {
             try {
                 while (true) {
                     String message = in.readUTF();
-                    if (message.equals("/exitok")){
-                         break;
+                    if (message.equals("/exitok")) {
+                        break;
                     }
                     System.out.println(message);
                 }
