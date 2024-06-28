@@ -52,6 +52,19 @@ public class Server {
         }
     }
 
+    public void kickUser(String userToKick) {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(userToKick)) {
+                c.sendMessage("Вы были отключены от чата администратором.");
+                c.disconnect();
+                clients.remove(c);
+                broadcastMessage("Пользователь " + userToKick + " был отключен от чата администратором.");
+                break;
+            }
+        }
+
+    }
+
     public boolean isUserNameBusy(String username) {
         for (ClientHandler c : clients) {
             if (c.getUsername().equals(username)) {
@@ -61,3 +74,4 @@ public class Server {
         return false;
     }
 }
+

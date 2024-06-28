@@ -1,5 +1,6 @@
 package ru.otus.june.chat;
 
+import javax.crypto.spec.PSource;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -37,6 +38,7 @@ public class Client {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
+//                System.out.println("пришли сюда");
                 disconnect();
             }
         }).start();
@@ -71,5 +73,7 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Пользователь вышел");
     }
 }
+

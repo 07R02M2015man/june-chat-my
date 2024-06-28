@@ -8,11 +8,13 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
         private String login;
         private String password;
         private String username;
+        private String role;
 
-        public User(String login, String password, String username) {
+        public User(String login, String password, String username, String role) {
             this.login = login;
             this.password = password;
             this.username = username;
+            this.role = role;
         }
     }
 
@@ -22,9 +24,10 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
     public InMemoryAuthentificationProvider(Server server) {
         this.server = server;
         this.users = new ArrayList<>();
-        this.users.add(new User("login1", "pass1", "user1"));
-        this.users.add(new User("login2", "pass2", "user2"));
-        this.users.add(new User("login3", "pass3", "user3"));
+        this.users.add(new User("login1", "pass1", "user1", "USER"));
+        this.users.add(new User("login2", "pass2", "user2", "USER"));
+        this.users.add(new User("login3", "pass3", "user3", "USER"));
+        this.users.add(new User("admin", "admin", "admin", "ADMIN"));
     }
 
     @Override
@@ -53,6 +56,16 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
     private boolean isUsernameAlreadyExist(String username) {
         for (User u : users) {
             if (u.username.equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private boolean isAdmin(String username) {
+        for (User u : users) {
+            if (u.username.equals(username) && u.role.equals("ADMIN")) {
                 return true;
             }
         }
@@ -90,10 +103,31 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
             clientHandler.sendMessage("Указанное имя пользователя уже занято");
             return false;
         }
-        users.add(new User(login, password, username));
+        users.add(new User(login, password, username, "USER"));
         clientHandler.setUsername(username);
         server.subscribe(clientHandler);
         clientHandler.sendMessage("/regok " + username);
         return true;
     }
+
+    @Override
+    public boolean checkKickUser(ClientHandler clientHandler, String username) {
+        if (!isUsernameAlreadyExist(username)) {
+            clientHandler.sendMessage("Указанное имя пользователя не существует!");
+            return false;
+        }
+        if (!isAdmin(clientHandler.getUsername())) {
+            clientHandler.sendMessage("Недостаточно прав для отключения пользователя.");
+            return false;
+        }
+        if (!server.isUserNameBusy(username)) {
+            clientHandler.sendMessage("Пользователь с таким именем не подключен!");
+            return false;
+        }
+        return true;
+    }
+
+
+
 }
+
