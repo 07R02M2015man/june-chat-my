@@ -124,12 +124,16 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
             clientHandler.sendMessage("Пользователь с таким именем не подключен!");
             return false;
         }
-        clientHandler.setUsername(username);
-        server.unsubscribe(clientHandler);
+//        server.kickUser(username);
+//        clientHandler.setUsername(username);
+//        clientHandler.disconnect();
+//        server.unsubscribe(clientHandler);
+        System.out.println(clientHandler.getUsername());
         server.broadcastMessage(username + " отключен");
-        clientHandler.sendMessage("/kickok " + username);
+        //clientHandler.sendMessage("/kickok " + username);
         return true;
     }
+
 
 
 }

@@ -75,9 +75,9 @@ public class ClientHandler {
                                 continue;
                             }
                             if (server.getAuthentificationProvider().kickUser(this, elements[1])){
-//                                setUsername(elements[1]);
-                                break;
+                                server.kickUser(elements[1]);
                             }
+                            continue;
                         }
                         sendMessage("Неверная команда. Повторите попытку.");
                         continue;

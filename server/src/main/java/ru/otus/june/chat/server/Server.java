@@ -52,6 +52,15 @@ public class Server {
         }
     }
 
+    public void kickUser(String username){
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(username)) {
+                c.disconnect();
+            }
+        }
+
+    }
+
     public boolean isUserNameBusy(String username) {
         for (ClientHandler c : clients) {
             if (c.getUsername().equals(username)) {
