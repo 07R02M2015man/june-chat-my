@@ -1,5 +1,6 @@
 package ru.otus.june.chat;
 
+import javax.crypto.spec.PSource;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -23,6 +24,18 @@ public class Client {
                     String message = in.readUTF();
                     if (message.equals("/exitok")) {
                         break;
+                    }
+                    if (message.startsWith("/authok ")) {
+                        System.out.println("Удалось упешно войти в чат под именем пользователя: " + message.split(" ")[1]);
+                        continue;
+                    }
+                    if (message.startsWith("/regok ")) {
+                        System.out.println("Удалось упешно пройти регистрацию войти в чат под именем пользователя: " + message.split(" ")[1]);
+                        continue;
+                    }
+                    if (message.startsWith("/kickok ")) {
+                        System.out.println(message.split(" ")[1] + " успешно отключен от чата!");
+                        continue;
                     }
                     System.out.println(message);
                 }
@@ -63,5 +76,6 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Пользователь вышел");
     }
 }
