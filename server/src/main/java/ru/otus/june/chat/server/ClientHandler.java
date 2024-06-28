@@ -62,22 +62,22 @@ public class ClientHandler {
                 }
                 while (true) {
                     String message = in.readUTF();
-                    if (message.startsWith("/kick")) {
-                        String[] elements = message.split(" ");
-                        if (elements.length != 2) {
-                            sendMessage("Неверный формат команды. Используйте '/kick username'");
-                            continue;
-                        }
-                        if (server.getAuthentificationProvider().kickUser(this, elements[1])){
-                            setUsername(elements[1]);
-                            sendMessage("/exitok");
-                            break;
-                        }
-                    }
+
                     if (message.startsWith("/")) {
                         if (message.equals("/exit")) {
                             sendMessage("/exitok");
                             break;
+                        }
+                        if (message.startsWith("/kick")) {
+                            String[] elements = message.split(" ");
+                            if (elements.length != 2) {
+                                sendMessage("Неверный формат команды. Используйте '/kick username'");
+                                continue;
+                            }
+                            if (server.getAuthentificationProvider().kickUser(this, elements[1])){
+//                                setUsername(elements[1]);
+                                break;
+                            }
                         }
                         sendMessage("Неверная команда. Повторите попытку.");
                         continue;

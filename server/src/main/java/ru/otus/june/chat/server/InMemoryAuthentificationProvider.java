@@ -112,7 +112,6 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
 
     @Override
     public boolean kickUser(ClientHandler clientHandler, String username) {
-        String adminUsername = clientHandler.getUsername();
         if (!isUsernameAlreadyExist(username)) {
             clientHandler.sendMessage("Указанное имя пользователя не существует!");
             return false;
@@ -126,8 +125,9 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
             return false;
         }
         clientHandler.setUsername(username);
-        //server.unsubscribe(clientHandler);
+        server.unsubscribe(clientHandler);
         server.broadcastMessage(username + " отключен");
+        clientHandler.sendMessage("/kickok " + username);
         return true;
     }
 
