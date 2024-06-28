@@ -130,7 +130,6 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
 //        server.unsubscribe(clientHandler);
         System.out.println(clientHandler.getUsername());
         server.broadcastMessage(username + " отключен");
-        //clientHandler.sendMessage("/kickok " + username);
         return true;
     }
 

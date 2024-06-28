@@ -33,10 +33,6 @@ public class Client {
                         System.out.println("Удалось упешно пройти регистрацию войти в чат под именем пользователя: " + message.split(" ")[1]);
                         continue;
                     }
-                    if (message.startsWith("/kickok ")) {
-                        System.out.println(message.split(" ")[1] + " успешно отключен от чата!");
-                        continue;
-                    }
                     System.out.println(message);
                 }
             } catch (IOException e) {
