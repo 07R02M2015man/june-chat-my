@@ -124,6 +124,12 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
             clientHandler.sendMessage("Пользователь с таким именем не подключен!");
             return false;
         }
+        System.out.println(clientHandler.getUsername());
+        System.out.println(username);
+        if (clientHandler.getUsername().equals(username)){
+            clientHandler.sendMessage("Нельзя удалить самого себя!");
+            return false;
+        }
         return true;
     }
 
