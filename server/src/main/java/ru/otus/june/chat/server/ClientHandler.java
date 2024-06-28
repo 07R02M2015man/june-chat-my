@@ -53,7 +53,7 @@ public class ClientHandler {
                             sendMessage("Неверный формат команды /register");
                             continue;
                         }
-                        if (server.getAuthentificationProvider().registration(this, elements[1], elements[2], elements[3 ])){
+                        if (server.getAuthentificationProvider().registration(this, elements[1], elements[2], elements[3])){
                             break;
                         }
                         continue;
@@ -62,11 +62,24 @@ public class ClientHandler {
                 }
                 while (true) {
                     String message = in.readUTF();
+                    if (message.startsWith("/kick")) {
+                        String[] elements = message.split(" ");
+                        if (elements.length != 2) {
+                            sendMessage("Неверный формат команды. Используйте '/kick username'");
+                            continue;
+                        }
+                        if (server.getAuthentificationProvider().kickUser(this, elements[1])){
+                            setUsername(elements[1]);
+                            sendMessage("/exitok");
+                            break;
+                        }
+                    }
                     if (message.startsWith("/")) {
                         if (message.equals("/exit")) {
                             sendMessage("/exitok");
                             break;
                         }
+                        sendMessage("Неверная команда. Повторите попытку.");
                         continue;
                     }
                     server.broadcastMessage(username + ": " + message);
@@ -74,7 +87,7 @@ public class ClientHandler {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                disconnct();
+                disconnect();
             }
         }).start();
     }
@@ -87,7 +100,7 @@ public class ClientHandler {
         }
     }
 
-    public void disconnct() {
+    public void disconnect() {
         server.unsubscribe(this);
         try {
             if (in != null) {
