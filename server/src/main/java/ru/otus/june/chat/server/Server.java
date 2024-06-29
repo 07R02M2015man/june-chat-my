@@ -57,7 +57,7 @@ public class Server {
             if (c.getUsername().equals(userToKick)) {
                 c.sendMessage("Вы были отключены от чата администратором.");
 //                c.disconnect();
-//                clients.remove(c);
+                clients.remove(c);
                 broadcastMessage("Пользователь " + userToKick + " был отключен от чата администратором.");
                 break;
             }
