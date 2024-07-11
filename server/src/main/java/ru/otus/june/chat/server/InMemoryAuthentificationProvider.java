@@ -1,38 +1,29 @@
 package ru.otus.june.chat.server;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class InMemoryAuthentificationProvider implements AuthentificationProvider {
-    private class User {
-        private String login;
-        private String password;
-        private String username;
-        private String role;
-
-        public User(String login, String password, String username, String role) {
-            this.login = login;
-            this.password = password;
-            this.username = username;
-            this.role = role;
-        }
-    }
-
     private Server server;
     private List<User> users;
 
     public InMemoryAuthentificationProvider(Server server) {
         this.server = server;
-        this.users = new ArrayList<>();
-        this.users.add(new User("login1", "pass1", "user1", "USER"));
-        this.users.add(new User("login2", "pass2", "user2", "USER"));
-        this.users.add(new User("login3", "pass3", "user3", "USER"));
-        this.users.add(new User("admin", "admin", "admin", "ADMIN"));
+//        this.users = new ArrayList<>();
+//        this.users.add(new User("login1", "pass1", "user1", "USER"));
+//        this.users.add(new User("login2", "pass2", "user2", "USER"));
+//        this.users.add(new User("login3", "pass3", "user3", "USER"));
+//        this.users.add(new User("admin", "admin", "admin", "ADMIN"));
+        try {
+            DBAuthenticationProvider.connect();
+            users = DBAuthenticationProvider.readDB();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void initialize() {
-        System.out.println("Сервис аутентификации запущен: In-Memory режим");
+        System.out.println("Сервис аутентификации запущен: DB режим");
     }
 
     private String getUsernameByLoginAndPassowrd(String login, String password) {
@@ -106,6 +97,13 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
         users.add(new User(login, password, username, "USER"));
         clientHandler.setUsername(username);
         server.subscribe(clientHandler);
+
+        try {
+            DBAuthenticationProvider.writeDB(login, password, username, "USER");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         clientHandler.sendMessage("/regok " + username);
         return true;
     }
