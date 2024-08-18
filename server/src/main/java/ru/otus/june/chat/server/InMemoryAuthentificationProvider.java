@@ -1,29 +1,29 @@
 package ru.otus.june.chat.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.sql.SQLException;
 import java.util.List;
 
 public class InMemoryAuthentificationProvider implements AuthentificationProvider {
-    private Server server;
+    private static final Logger logger = LogManager.getLogger(InMemoryAuthentificationProvider.class.getName());;
+    private final Server server;
     private List<User> users;
 
     public InMemoryAuthentificationProvider(Server server) {
         this.server = server;
-//        this.users = new ArrayList<>();
-//        this.users.add(new User("login1", "pass1", "user1", "USER"));
-//        this.users.add(new User("login2", "pass2", "user2", "USER"));
-//        this.users.add(new User("login3", "pass3", "user3", "USER"));
-//        this.users.add(new User("admin", "admin", "admin", "ADMIN"));
         try {
             DBAuthenticationProvider.connect();
             users = DBAuthenticationProvider.readDB();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Ошибка чтения базы данных",e);
         }
     }
 
     @Override
     public void initialize() {
-        System.out.println("Сервис аутентификации запущен: DB режим");
+        logger.info("Сервис аутентификации запущен: DB режим");
     }
 
     private String getUsernameByLoginAndPassowrd(String login, String password) {
@@ -53,7 +53,6 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
         return false;
     }
 
-
     private boolean isAdmin(String username) {
         for (User u : users) {
             if (u.username.equals(username) && u.role.equals("ADMIN")) {
@@ -64,14 +63,18 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
     }
 
     @Override
-    public synchronized boolean authenticate(ClientHandler clientHandler, String login, String password) {
+    public synchronized boolean authenticate(ClientHandler clientHandler, String login, String password) throws SQLException {
         String authUsername = getUsernameByLoginAndPassowrd(login, password);
         if (authUsername == null) {
-            clientHandler.sendMessage("Некорректный логин/пароль ");
+            clientHandler.sendMessage("Некорректный логин/пароль!");
             return false;
         }
         if (server.isUserNameBusy(authUsername)) {
-            clientHandler.sendMessage("Указанная учетная запись уже занята");
+            clientHandler.sendMessage("Пользователь с такой учетной записью уже авторизован!");
+            return false;
+        }
+        if (server.isClientBanned(authUsername)) {
+            clientHandler.sendMessage("Указанный пользователь забанен!");
             return false;
         }
         clientHandler.setUsername(authUsername);
@@ -103,34 +106,50 @@ public class InMemoryAuthentificationProvider implements AuthentificationProvide
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         clientHandler.sendMessage("/regok " + username);
         return true;
     }
 
     @Override
-    public boolean checkKickUser(ClientHandler clientHandler, String username) {
+    public boolean checkUsers(ClientHandler clientHandler, String username) {
         if (!isUsernameAlreadyExist(username)) {
             clientHandler.sendMessage("Указанное имя пользователя не существует!");
-            return false;
-        }
-        if (!isAdmin(clientHandler.getUsername())) {
-            clientHandler.sendMessage("Недостаточно прав для отключения пользователя.");
             return false;
         }
         if (!server.isUserNameBusy(username)) {
             clientHandler.sendMessage("Пользователь с таким именем не подключен!");
             return false;
         }
-        System.out.println(clientHandler.getUsername());
-        System.out.println(username);
-        if (clientHandler.getUsername().equals(username)){
-            clientHandler.sendMessage("Нельзя удалить самого себя!");
+        if (!isAdmin(clientHandler.getUsername())) {
+            clientHandler.sendMessage("Недостаточно прав для выполнения команды.");
+            return false;
+        }
+        if (isAdmin(username)) {
+            clientHandler.sendMessage("Указаный пользователь " + username +" является Админом. Нельзя выполнить указанное действие!");
             return false;
         }
         return true;
     }
 
+    @Override
+    public boolean checkIsAdmin(ClientHandler clientHandler) {
+        if (!isAdmin(clientHandler.getUsername())) {
+            clientHandler.sendMessage("Недостаточно прав для выполнения команды.");
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean changeNickName(String newNick, String username) {
+        try {
+            DBAuthenticationProvider.updateUsernameDB(newNick, username);
+            users = DBAuthenticationProvider.readDB();
+        } catch (Exception e) {
+            logger.error("Ошибка чтения БД:",e);
+        }
+        return true;
+    }
 
 
 }

@@ -5,12 +5,15 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Client {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
+    private boolean activeClient;
 
     public Client() throws IOException {
         Scanner scanner = new Scanner(System.in);
@@ -22,6 +25,9 @@ public class Client {
             try {
                 while (true) {
                     String message = in.readUTF();
+                    String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
+                    String messageTime = "[" + time + "] ";
+                    System.out.print(messageTime);
                     if (message.equals("/exitok")) {
                         break;
                     }
@@ -33,15 +39,29 @@ public class Client {
                         System.out.println("Удалось упешно пройти регистрацию войти в чат под именем пользователя: " + message.split(" ")[1]);
                         continue;
                     }
+                    if (message.equals("/disconnectBanOk")) {
+                        out.writeUTF("/disconnect");
+                        break;
+                    }
+                    if (message.equals("/disconnectInactiveOk")) {
+                        System.out.println("Вы отключены из-за неактивности");
+                        out.writeUTF("/disconnect");
+                        break;
+                    }
+                    if (message.equals("/shutdownOk")) {
+                        System.out.println("Сервер остановлен!");
+                        out.writeUTF("/disconnect");
+                        break;
+                    }
                     System.out.println(message);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-//                System.out.println("пришли сюда");
                 disconnect();
             }
         }).start();
+
         while (true) {
             String message = scanner.nextLine();
             out.writeUTF(message);
@@ -73,7 +93,7 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Пользователь вышел");
+        System.out.println("Пользователь отключен!");
     }
 }
 
